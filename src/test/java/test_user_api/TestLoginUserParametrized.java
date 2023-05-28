@@ -1,3 +1,7 @@
+package test_user_api;
+
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import object_api.User;
@@ -38,15 +42,10 @@ public class TestLoginUserParametrized {
     }
 
 
-    /*
-        @Test
-        @DisplayName("Check no way to login courier with invalid param")
-        @Description("This is test which checks no way to login courier with invalid param")
 
-     */
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api/auth";
+        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api";
         User user = new User(email, password, name);
         Response response = UserStep.createUser(user);
         response.then().assertThat().statusCode(200)
@@ -56,7 +55,9 @@ public class TestLoginUserParametrized {
     }
 
     @Test
-    public void loginUser(){
+    @DisplayName("Login user with incorrect parameters")
+    @Description("This is test checks inability to login user, when parameters is incorrect")
+    public void shouldNotBeLoginUserWithIncorrectParameters(){
         User user = new User(emailParam, passwordParam);
         Response response = UserStep.loginUser(user);
         response.then().assertThat().statusCode(401)

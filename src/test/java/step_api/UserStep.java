@@ -1,5 +1,6 @@
 package step_api;
 
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import object_api.User;
 
@@ -7,11 +8,12 @@ import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_OK;
 
 public class UserStep {
-    final static String createApi = "/register";
-    final static String loginApi = "/login";
-   //final static String delApi = "/api/v1/courier/";
+    final static String createApi = "/auth/register";
+    final static String loginApi = "/auth/login";
+    final static String deleteAndChangeApi = "/auth/user";
 
 
+    @Step("create user")
     public static Response createUser(User user) {
         Response response = given()
                 .header("Content-type", "application/json")
@@ -24,6 +26,7 @@ public class UserStep {
     }
 
 
+    @Step("login user")
     public static Response loginUser(User user) {
 
         Response response = given()
@@ -36,8 +39,33 @@ public class UserStep {
         return response;
     }
 
+    @Step("change user's parameters with authorization")
+    public static Response changeWithLoginUser(User user, String token) {
 
+        Response response = given()
+                .header("Content-type", "application/json")
+                .auth()
+                .oauth2(token)
+                .and()
+                .body(user)
+                .when()
+                .patch(deleteAndChangeApi);
+        return response;
+    }
 
+    @Step("change user's parameters without authorization")
+    public static Response changeWithoutLoginUser(User user) {
+
+        Response response = given()
+                .header("Content-type", "application/json")
+                .and()
+                .body(user)
+                .when()
+                .patch(deleteAndChangeApi);
+        return response;
+    }
+
+    @Step("delete User")
     public static void deleteUser(String token) {
 
         given()
@@ -45,7 +73,7 @@ public class UserStep {
                 .auth()
                 .oauth2(token)
                 .when()
-                .delete("https://stellarburgers.nomoreparties.site/api/auth/user")
+                .delete(deleteAndChangeApi)
                 .then().assertThat().statusCode(202);
     }
 

@@ -1,3 +1,7 @@
+package test_user_api;
+
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import object_api.User;
@@ -17,16 +21,18 @@ public class TestCreateUser {
 
     final static String email = "tatuka1001@yandex.ru";
     final static String password = "1234567";
-    final static String name = "aske";
+    final static String name = "naske";
     public static String token;
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api/auth";
+        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api";
     }
 
     @Test
-    public void createNewUser(){
+    @DisplayName("Create new user")
+    @Description("This is test checks ability to create new user, when parameters are correct")
+    public void shouldBeCreateNewUserWithCorrectParameters(){
         User user = new User(email, password, name);
 
         Response response = UserStep.createUser(user);
@@ -38,7 +44,9 @@ public class TestCreateUser {
     }
 
     @Test
-    public void notBeTwoTwinsUsers(){
+    @DisplayName("Create new twins user")
+    @Description("This is test checks inability to create new user, when parameters are incorrect and there is a twin ")
+    public void shouldNotBeTwoTwinsUsers(){
         User user = new User(email, password, name);
         Response response = UserStep.createUser(user);
         response.then().assertThat().statusCode(200)

@@ -1,3 +1,7 @@
+package test_user_api;
+
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import object_api.User;
@@ -40,7 +44,7 @@ public class TestChangeUserDataParametrized {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api/auth";
+        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api";
         User user = new User(email, password, name);
         Response response = UserStep.createUser(user);
         response.then().assertThat().statusCode(200)
@@ -50,16 +54,11 @@ public class TestChangeUserDataParametrized {
     }
 
     @Test
+    @DisplayName("Change user's parameters with the user has logged in")
+    @Description("This is test checks ability to change user's parameters, when he user has logged in")
     public void shouldBeChangedWithLoginUser(){
         User user = new User(emailParam, password, nameParam);
-        Response response= given()
-                .header("Content-type", "application/json")
-                .auth()
-                .oauth2(token)
-                .and()
-                .body(user)
-                .when()
-                .patch("/user");
+        Response response= UserStep.changeWithLoginUser(user, token);
         response
                 .then().assertThat().statusCode(200)
                 .and()
@@ -70,14 +69,11 @@ public class TestChangeUserDataParametrized {
     }
 
     @Test
+    @DisplayName("Change user's parameters with the user hasn't logged in")
+    @Description("This is test checks inability to change user's parameters, when he user hasn't logged in")
     public void shouldNotBeChangedWithoutLoginUser(){
         User user = new User(emailParam, password, nameParam);
-        Response response= given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(user)
-                .when()
-                .patch("/user");
+        Response response= UserStep.changeWithoutLoginUser(user);
         response
                 .then().assertThat().statusCode(401)
                 .and()
