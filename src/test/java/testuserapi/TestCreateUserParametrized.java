@@ -1,22 +1,23 @@
+package testuserapi;
+
+import com.github.javafaker.Faker;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import object_api.User;
-import org.json.JSONObject;
+import objectapi.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import step_api.UserStep;
+import setting.SetTest;
+import stepapi.UserStep;
 
-import static org.apache.http.HttpStatus.SC_CREATED;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(Parameterized.class)
 public class TestCreateUserParametrized {
-
+    static Faker faker = new Faker();
     private final String emailParam;
     private final String passwordParam;
     private final String userNameParam;
@@ -31,26 +32,23 @@ public class TestCreateUserParametrized {
     @Parameterized.Parameters
     public static Object[][] getCredentials() {
         return new Object[][]{
-                {"tatuka100500@yandex.ru", "123", ""},
-                {"tatuka100500@yandex.ru", "", "user"},
-                {"", "123", "user"},
+                {faker.internet().emailAddress(), faker.internet().password(6, 12), ""},
+                {faker.internet().emailAddress(), "", faker.name().firstName()},
+                {"", faker.internet().password(6, 12), faker.name().firstName()},
         };
     }
 
 
-/*
-    @Test
-    @DisplayName("Check no way to login courier with invalid param")
-    @Description("This is test which checks no way to login courier with invalid param")
 
- */
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api/auth";
+        RestAssured.baseURI = SetTest.getBaseUri();
     }
 
     @Test
-    public void createNewUser(){
+    @DisplayName("Create user with incorrect parameters")
+    @Description("This is test checks inability to create user, when parameters is incorrect")
+    public void shouldNotBeCreateNewUserWithIncorrectParameters(){
         User user = new User(emailParam, passwordParam, userNameParam);
 
         Response response = UserStep.createUser(user);

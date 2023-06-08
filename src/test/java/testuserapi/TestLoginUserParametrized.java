@@ -1,22 +1,28 @@
+package testuserapi;
+
+import com.github.javafaker.Faker;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import object_api.User;
-import org.json.JSONObject;
+import objectapi.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import step_api.UserStep;
+import setting.SetTest;
+import stepapi.UserStep;
 
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(Parameterized.class)
 public class TestLoginUserParametrized {
 
-    final static String email = "tatuka1001@yandex.ru";
-    final static String password = "1234567";
-    final static String name = "aske";
+    static Faker faker = new Faker();
+    final static String email = faker.internet().emailAddress();
+    final static String password = faker.internet().password(6, 12);
+    final static String name = faker.name().firstName();
 
     public static String token;
     private final String emailParam;
@@ -32,31 +38,28 @@ public class TestLoginUserParametrized {
     @Parameterized.Parameters
     public static Object[][] getCredentials() {
         return new Object[][]{
-                {"tatuka1001@yandex.ru", "123"},
-                {"tatuka100500@yandex.ru", "1234567"},
+                {email, faker.internet().password(6, 12)},
+                {faker.internet().emailAddress(), password},
         };
     }
 
 
-    /*
-        @Test
-        @DisplayName("Check no way to login courier with invalid param")
-        @Description("This is test which checks no way to login courier with invalid param")
 
-     */
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/api/auth";
+        RestAssured.baseURI = SetTest.getBaseUri();
         User user = new User(email, password, name);
         Response response = UserStep.createUser(user);
         response.then().assertThat().statusCode(200)
                 .and()
                 .assertThat().body("success", equalTo(true));
-        token = new JSONObject(response.getBody().asString()).get("accessToken").toString().substring(7);
+        token = user.setGetToken(response);
     }
 
     @Test
-    public void loginUser(){
+    @DisplayName("Login user with incorrect parameters")
+    @Description("This is test checks inability to login user, when parameters is incorrect")
+    public void shouldNotBeLoginUserWithIncorrectParameters(){
         User user = new User(emailParam, passwordParam);
         Response response = UserStep.loginUser(user);
         response.then().assertThat().statusCode(401)
